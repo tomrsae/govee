@@ -116,14 +116,13 @@ func main() {
 	const (
 		DEF_BRIGHT uint = 101
 	)
-	fmt.Printf("\t../ %s (c)2023-%d Lord of Scripts \\..\n", govee.Version, time.Now().Year())
-	fmt.Println("\t    https://allmylinks.com/lordofscripts")
 	// declare real CLI options
-	var optHelp, optList, optOn, optOff, optState, optInit bool
+	var optHelp, optVersion, optList, optOn, optOff, optState, optInit bool
 	// declare CLI options which have an explicit value
 	var inDevice, inModel, inAlias, inColor string
 	var inBright uint
 	flag.BoolVar(&optHelp, "help", false, "This help")
+	flag.BoolVar(&optVersion, "version", false, "Version and developer info")
 	flag.BoolVar(&optInit, "init", false, "Create sample config file")
 	flag.BoolVar(&optList, "list", false, "List devices")
 	flag.BoolVar(&optOn, "on", false, "Turn ON [device command]")
@@ -156,6 +155,13 @@ func main() {
 		die(RETVAL_CLI_MISSING, "Missing CLI options")
 	}
 
+	if optVersion {
+		fmt.Printf("%s (c)2023-%d Lord of Scripts\n", govee.Version, time.Now().Year())
+		fmt.Println("\thttps://allmylinks.com/lordofscripts")
+
+		os.Exit(RETVAL_OK)
+	}
+
 	if optInit {
 		if created, err := govee.CreateSampleConfigFile(); err != nil {
 			die(RETVAL_CLI_INIT, err.Error())
@@ -179,7 +185,7 @@ func main() {
 	inDevice, inModel = resolveAlias(inAlias, inDevice, inModel)
 
 	// with STATE, ON & OFF commands DEVICE & MODEL are required
-	if (optOn || optOff || optState) && ((len(inDevice) == 0) && (len(inModel) == 0)) {
+	if (optOn || optOff || optState) && ((len(inDevice) == 0) || (len(inModel) == 0)) {
 		getHelp()
 
 		die(RETVAL_CFG_MODEL, "-dev MAC and -model MODEL options are required!")
